@@ -1,7 +1,6 @@
-const { Client, GatewayIntentBits, PermissionsBitField, TextInputStyle ,Events, TextInputBuilder , EmbedBuilder, ActionRowBuilder ,ButtonBuilder,InteractionType, ButtonStyle,Partials, ModalBuilder ,AttachmentBuilder } = require('discord.js');
+const { Client, GatewayIntentBits, PermissionsBitField, StringSelectMenuBuilder, TextInputStyle, Events, TextInputBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, InteractionType, ButtonStyle, Partials, ModalBuilder, AttachmentBuilder } = require('discord.js');
 const axios = require('axios');
 const crypto = require('crypto');
-
 
 const client = new Client({
   intents: [
@@ -13,11 +12,10 @@ const client = new Client({
   ],
   partials: [Partials.Channel]
 });
-const fluxAuthConfig = new Map(); 
 
-const token = 'TokenDoSeuBot';
+const token = 'SUA_TOKEN';
 
-const accessTokens = new Map(); 
+const accessTokens = new Map();
 
 client.once('ready', async () => {
   console.log(`Bot logado como ${client.user.tag}`);
@@ -55,7 +53,7 @@ client.once('ready', async () => {
         options: [
           {
             name: 'novo_nome',
-            type: 3, 
+            type: 3,
             description: 'Novo nome para o canal',
             required: true,
           }
@@ -67,7 +65,7 @@ client.once('ready', async () => {
         options: [
           {
             name: 'usuario',
-            type: 6, 
+            type: 6,
             description: 'Usuário a ser banido',
             required: true,
           },
@@ -85,7 +83,7 @@ client.once('ready', async () => {
         options: [
           {
             name: 'quantidade',
-            type: 4, 
+            type: 4,
             description: 'Número de mensagens para limpar',
             required: true,
           }
@@ -97,7 +95,7 @@ client.once('ready', async () => {
         options: [
           {
             name: 'valor',
-            type: 4, 
+            type: 4,
             description: 'Valor a ser pago',
             required: true,
           }
@@ -110,29 +108,11 @@ client.once('ready', async () => {
   }
 });
 
-
 client.on(Events.InteractionCreate, async (interaction) => {
-  if (interaction.type === InteractionType.ApplicationCommand) {
+  if (interaction.isCommand()) {
     if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
       return interaction.reply({ content: 'Você precisa ser um administrador para usar este comando.', ephemeral: true });
     }
-
-           if (interaction.commandName === 'configapplicationid') {
-      const applicationId = interaction.options.getString('application_id');
-      const config = fluxAuthConfig.get(interaction.guild.id) || {};
-      config.applicationId = applicationId;
-      fluxAuthConfig.set(interaction.guild.id, config);
-      await interaction.reply({ content: 'Application ID configurado com sucesso!', ephemeral: true });
-    }
-
-    if (interaction.commandName === 'configsecretkey') {
-      const secretKey = interaction.options.getString('secret_key');
-      const config = fluxAuthConfig.get(interaction.guild.id) || {};
-      config.secretKey = secretKey;
-      fluxAuthConfig.set(interaction.guild.id, config);
-      await interaction.reply({ content: 'Secret Key configurada com sucesso!', ephemeral: true });
-    }
-  }
 
     if (interaction.commandName === 'setapi') {
       const token = interaction.options.getString('token');
@@ -188,108 +168,41 @@ client.on(Events.InteractionCreate, async (interaction) => {
       }
     }
 
-  if (interaction.commandName === 'ticket') {
-  try {
-    const modal = new ModalBuilder()
-      .setCustomId('modal_ticket')
-      .setTitle('Criar Ticket');
+    if (interaction.commandName === 'ticket') {
+      const modal = new ModalBuilder()
+        .setCustomId('modal_ticket')
+        .setTitle('Criar Ticket');
 
-    const colorInput = new TextInputBuilder()
-      .setCustomId('color')
-      .setLabel('Cor do embed em hexadecimal')
-      .setRequired(true)
-      .setStyle(TextInputStyle.Short);
+      const colorInput = new TextInputBuilder()
+        .setCustomId('color')
+        .setLabel('Cor do embed em hexadecimal')
+        .setRequired(true)
+        .setStyle(TextInputStyle.Short);
 
-    const messageInput = new TextInputBuilder()
-      .setCustomId('message')
-      .setLabel('Mensagem')
-      .setRequired(true)
-      .setStyle(TextInputStyle.Paragraph);
+      const messageInput = new TextInputBuilder()
+        .setCustomId('message')
+        .setLabel('Mensagem')
+        .setRequired(true)
+        .setStyle(TextInputStyle.Paragraph);
 
-    const channelInput = new TextInputBuilder()
-      .setCustomId('channel')
-      .setLabel('ID do canal')
-      .setRequired(true)
-      .setStyle(TextInputStyle.Short);
+      const channelInput = new TextInputBuilder()
+        .setCustomId('channel')
+        .setLabel('ID do canal')
+        .setRequired(true)
+        .setStyle(TextInputStyle.Short);
 
-    const buttonLabelInput = new TextInputBuilder()
-      .setCustomId('button_label')
-      .setLabel('Texto do botão')
-      .setRequired(true)
-      .setStyle(TextInputStyle.Short);
+      modal.addComponents(
+        new ActionRowBuilder().addComponents(colorInput),
+        new ActionRowBuilder().addComponents(messageInput),
+        new ActionRowBuilder().addComponents(channelInput)
+      );
 
-    modal.addComponents(
-      new ActionRowBuilder().addComponents(colorInput),
-      new ActionRowBuilder().addComponents(messageInput),
-      new ActionRowBuilder().addComponents(channelInput),
-      new ActionRowBuilder().addComponents(buttonLabelInput),
-    );
-
-    await interaction.showModal(modal);
-  } catch (error) {
-    console.error('Erro ao executar o comando /ticket:', error);
-
-    try {
-      await interaction.reply({ content: 'Houve um erro ao tentar exibir o modal.', ephemeral: true });
-    } catch (replyError) {
-      console.error('Erro ao enviar a resposta de erro:', replyError);
+      await interaction.showModal(modal);
     }
-  }
-}
-
-
-   if (interaction.commandName === 'mensagem') {
-  try {
-    const modal = new ModalBuilder()
-      .setCustomId('modal_mensagem')
-      .setTitle('Enviar Mensagem');
-
-    const colorInput = new TextInputBuilder()
-      .setCustomId('color')
-      .setLabel('Cor do embed em hexadecimal')
-      .setRequired(true)
-      .setStyle(TextInputStyle.Short);
-
-    const messageInput = new TextInputBuilder()
-      .setCustomId('message')
-      .setLabel('Mensagem')
-      .setRequired(true)
-      .setStyle(TextInputStyle.Paragraph);
-
-    const channelInput = new TextInputBuilder()
-      .setCustomId('channel')
-      .setLabel('ID do canal')
-      .setRequired(true)
-      .setStyle(TextInputStyle.Short);
-
-    const mediaInput = new TextInputBuilder()
-      .setCustomId('media')
-      .setLabel('Link da imagem ou vídeo')
-      .setRequired(false)
-      .setStyle(TextInputStyle.Short);
-
-    modal.addComponents(
-      new ActionRowBuilder().addComponents(colorInput),
-      new ActionRowBuilder().addComponents(messageInput),
-      new ActionRowBuilder().addComponents(channelInput),
-      new ActionRowBuilder().addComponents(mediaInput)
-    );
-
-    await interaction.showModal(modal);
-  } catch (error) {
-    console.error('Erro ao executar o comando /mensagem:', error);
-
-    try {
-      await interaction.reply({ content: 'Houve um erro ao tentar exibir o modal.', ephemeral: true });
-    } catch (replyError) {
-      console.error('Erro ao enviar a resposta de erro:', replyError);
-    }
-  }
-}
 
     if (interaction.commandName === 'mudarnome') {
       const newName = interaction.options.getString('novo_nome');
-      if (interaction.channel.type === 0) { 
+      if (interaction.channel.type === 0) {
         await interaction.channel.setName(newName);
         await interaction.reply({ content: `Nome do canal alterado para ${newName}`, ephemeral: true });
       } else {
@@ -297,36 +210,85 @@ client.on(Events.InteractionCreate, async (interaction) => {
       }
     }
 
-    if (interaction.commandName === 'ban') {
-  const user = interaction.options.getUser('usuario');
-  const reason = interaction.options.getString('motivo') || 'Sem motivo especificado';
+    if (interaction.commandName === 'mensagem') {
+      try {
+        const modal = new ModalBuilder()
+          .setCustomId('modal_mensagem')
+          .setTitle('Enviar Mensagem');
 
-  if (user) {
-    const member = interaction.guild.members.cache.get(user.id);
+        const colorInput = new TextInputBuilder()
+          .setCustomId('color')
+          .setLabel('Cor do embed em hexadecimal')
+          .setRequired(true)
+          .setStyle(TextInputStyle.Short);
 
-    if (!member) {
-      return interaction.reply({ content: 'O usuário não foi encontrado neste servidor.', ephemeral: true });
-    }
+        const messageInput = new TextInputBuilder()
+          .setCustomId('message')
+          .setLabel('Mensagem')
+          .setRequired(true)
+          .setStyle(TextInputStyle.Paragraph);
 
-    if (!interaction.guild.members.me.permissions.has(PermissionsBitField.Flags.BanMembers)) {
-      return interaction.reply({ content: 'Eu preciso de permissões de Administrador para banir membros.', ephemeral: true });
-    }
+        const channelInput = new TextInputBuilder()
+          .setCustomId('channel')
+          .setLabel('ID do canal')
+          .setRequired(true)
+          .setStyle(TextInputStyle.Short);
 
-    try {
-      await member.ban({ reason });
-      await interaction.reply({ content: `Usuário ${user.tag} banido por ${reason}`, ephemeral: true });
-    } catch (error) {
-      if (error.code === 50013) {
-        await interaction.reply({ content: 'Não tenho permissões suficientes para banir este usuário.', ephemeral: true });
-      } else {
-        console.error('Erro ao banir o usuário:', error);
-        await interaction.reply({ content: 'Houve um erro ao tentar banir o usuário.', ephemeral: true });
+        const mediaInput = new TextInputBuilder()
+          .setCustomId('media')
+          .setLabel('Link da imagem ou vídeo')
+          .setRequired(false)
+          .setStyle(TextInputStyle.Short);
+
+        modal.addComponents(
+          new ActionRowBuilder().addComponents(colorInput),
+          new ActionRowBuilder().addComponents(messageInput),
+          new ActionRowBuilder().addComponents(channelInput),
+          new ActionRowBuilder().addComponents(mediaInput)
+        );
+
+        await interaction.showModal(modal);
+      } catch (error) {
+        console.error('Erro ao executar o comando /mensagem:', error);
+
+        try {
+          await interaction.reply({ content: 'Houve um erro ao tentar exibir o modal.', ephemeral: true });
+        } catch (replyError) {
+          console.error('Erro ao enviar a resposta de erro:', replyError);
+        }
       }
     }
-  } else {
-    await interaction.reply({ content: 'Usuário não encontrado.', ephemeral: true });
-  }
 
+    if (interaction.commandName === 'ban') {
+      const user = interaction.options.getUser('usuario');
+      const reason = interaction.options.getString('motivo') || 'Sem motivo especificado';
+
+      if (user) {
+        const member = interaction.guild.members.cache.get(user.id);
+
+        if (!member) {
+          return interaction.reply({ content: 'O usuário não foi encontrado neste servidor.', ephemeral: true });
+        }
+
+        if (!interaction.guild.members.me.permissions.has(PermissionsBitField.Flags.BanMembers)) {
+          return interaction.reply({ content: 'Eu preciso de permissões de Administrador para banir membros.', ephemeral: true });
+        }
+
+        try {
+          await member.ban({ reason });
+          await interaction.reply({ content: `Usuário ${user.tag} banido por ${reason}`, ephemeral: true });
+        } catch (error) {
+          if (error.code === 50013) {
+            await interaction.reply({ content: 'Não tenho permissões suficientes para banir este usuário.', ephemeral: true });
+          } else {
+            console.error('Erro ao banir o usuário:', error);
+            await interaction.reply({ content: 'Houve um erro ao tentar banir o usuário.', ephemeral: true });
+          }
+        }
+      } else {
+        await interaction.reply({ content: 'Usuário não encontrado.', ephemeral: true });
+      }
+    }
 
     if (interaction.commandName === 'limpar') {
       const amount = interaction.options.getInteger('quantidade');
@@ -341,16 +303,16 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
   }
 
-  if (interaction.type === InteractionType.ModalSubmit) {
+  if (interaction.isModalSubmit()) {
+    // Tratamento de Modal
     if (interaction.customId === 'modal_ticket') {
       const color = interaction.fields.getTextInputValue('color');
       const message = interaction.fields.getTextInputValue('message');
       const channelId = interaction.fields.getTextInputValue('channel');
-      const buttonLabel = interaction.fields.getTextInputValue('button_label');
       const channel = client.channels.cache.get(channelId);
 
       if (!channel || channel.type !== 0 || channel.guild.id !== interaction.guild.id) {
-        return interaction.reply({ content: 'Canal inválido ou não pertence ao servidor atual.', ephemeral: true });
+        return interaction.reply({ content: 'Canal inválido.', ephemeral: true });
       }
 
       const embed = new EmbedBuilder()
@@ -358,17 +320,26 @@ client.on(Events.InteractionCreate, async (interaction) => {
         .setDescription(message)
         .setFooter({ text: `${interaction.guild.name} - © All rights reserved.` });
 
-      const button = new ButtonBuilder()
-        .setCustomId('open_ticket')
-        .setLabel(buttonLabel)
-        .setStyle(ButtonStyle.Primary);
+      const selectMenu = new ActionRowBuilder().addComponents(
+        new StringSelectMenuBuilder()
+          .setCustomId('select_ticket')
+          .setPlaceholder('Selecione uma opção')
+          .addOptions([
+            {
+              label: '📞 | Suporte',
+              value: 'suporte',
+            },
+            {
+              label: '💸 | Comprar',
+              value: 'comprar',
+            },
+          ]),
+      );
 
-      await channel.send({ embeds: [embed], components: [new ActionRowBuilder().addComponents(button)] });
+      await channel.send({ embeds: [embed], components: [selectMenu] });
 
       await interaction.reply({ content: 'Ticket configurado com sucesso!', ephemeral: true });
     }
-
-
 
     if (interaction.customId === 'modal_mensagem') {
       const color = interaction.fields.getTextInputValue('color');
@@ -396,33 +367,41 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
   }
 
-  if (interaction.type === InteractionType.MessageComponent) {
-    if (interaction.customId === 'open_ticket') {
+  if (interaction.isStringSelectMenu()) {
+    if (interaction.customId === 'select_ticket') {
       const guild = interaction.guild;
       const member = interaction.member;
+      const selectedOption = interaction.values[0];
+
+      let ticketName = '';
+      if (selectedOption === 'suporte') {
+        ticketName = `📞・${member.user.username}`;
+      } else if (selectedOption === 'comprar') {
+        ticketName = `💸・${member.user.username}`;
+      }
 
       const ticketChannel = await guild.channels.create({
-        name: `🎫・${member.user.username}`,
-        type: 0, 
+        name: ticketName,
+        type: 0,
         permissionOverwrites: [
           {
             id: guild.id,
-            deny: [PermissionsBitField.Flags.ViewChannel]
+            deny: [PermissionsBitField.Flags.ViewChannel],
           },
           {
             id: member.id,
-            allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.ManageChannels]
+            allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages],
           },
           {
             id: guild.roles.cache.find(role => role.permissions.has(PermissionsBitField.Flags.Administrator))?.id || guild.id,
-            allow: [PermissionsBitField.Flags.ViewChannel]
-          }
-        ]
+            allow: [PermissionsBitField.Flags.ViewChannel],
+          },
+        ],
       });
 
       const embed = new EmbedBuilder()
-        .setColor('#00FF00') 
-        .setDescription(`**TICKET SYSTEM**\n<@${member.id}>, Seu 🎫 ticket já foi criado, por favor não mencione os usuários do canal e aguarde ⏳, descreva os detalhes do motivo da abertura do ticket e aguarde um administrador responder. 🙏`)
+        .setColor('#00FF00')
+        .setDescription(`**TICKET SYSTEM**\n<@${member.id}>, Seu 🎫 ticket foi criado com sucesso! Aguarde por um administrador.`)
         .setFooter({ text: 'Ticket criado.' });
 
       const closeButton = new ButtonBuilder()
@@ -432,33 +411,35 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
       await ticketChannel.send({
         embeds: [embed],
-        components: [new ActionRowBuilder().addComponents(closeButton)]
+        components: [new ActionRowBuilder().addComponents(closeButton)],
       });
 
       await interaction.reply({ content: 'Seu ticket foi criado com sucesso!', ephemeral: true });
     }
+  }
 
+  if (interaction.isButton()) {
     if (interaction.customId === 'close_ticket') {
       if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-        return interaction.reply({ content: 'Você precisa ser um administrador para fechar este ticket.', ephemeral: true });
+        return interaction.reply({ content: 'Você não tem permissão para fechar este ticket.', ephemeral: true });
       }
 
       const channel = interaction.channel;
 
-      await interaction.reply({ content: 'Você está fechando este ticket. A mensagem de fechamento será enviada em breve.', ephemeral: true });
+      await interaction.reply({ content: 'Fechando o ticket...', ephemeral: true });
 
       const closeEmbed = new EmbedBuilder()
         .setColor('#FF0000')
-        .setDescription('Este ticket foi fechado. Se você precisar de mais ajuda, por favor crie um novo ticket.');
+        .setDescription('Este ticket foi fechado. Caso precise de mais assistência, crie um novo ticket.');
 
       await channel.send({ embeds: [closeEmbed] });
 
       setTimeout(async () => {
         await channel.delete();
-      }, 5000); 
+      }, 5000);
     }
   }
- });
+});
 
 async function verificarPagamento(transactionId, channelId, messageId, valor, mercadoPagoAccessToken) {
   try {
