@@ -34,7 +34,7 @@ Limpa uma quantidade específica de mensagens.
 ### ✉️ /mensagem
 Envia uma mensagem para um canal específico.
 ```bash
-/mensagem #canal [mensagem]
+/mensagem
 ```
 **Descrição:** Envia uma mensagem personalizada para o canal indicado.
 
