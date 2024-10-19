@@ -1,0 +1,19 @@
+{
+  "name": "BotManager",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "axios": "^1.7.2",
+    "BotManager": "file:",
+    "discord.js": "^14.15.3",
+    "mercadopago": "^1.5.14",
+    "purpobot": "file:"
+  }
+}
