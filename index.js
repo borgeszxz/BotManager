@@ -12,7 +12,7 @@ const client = new Client({
   ],
   partials: [Partials.Channel]
 });
-
+// //
 const token = 'SUA_TOKEN';
 
 const accessTokens = new Map();
@@ -304,7 +304,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 
   if (interaction.isModalSubmit()) {
-    // Tratamento de Modal
     if (interaction.customId === 'modal_ticket') {
       const color = interaction.fields.getTextInputValue('color');
       const message = interaction.fields.getTextInputValue('message');
